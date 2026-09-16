@@ -23,18 +23,24 @@ type ProbeInfo struct {
 	Matches []MatchInfo `json:"matches"`
 }
 
-type NmapProbeDB struct {
+type ProbeIndex struct {
+	ByPort map[uint16][]*ProbeInfo
+}
+type ProbeDB struct {
 	ProbeInfos []ProbeInfo
+	ProbeIdx   ProbeIndex
 }
 
-// Access probe payload via port / sslport
-func (nmapProbeDb *NmapProbeDB) Payload(port uint16) {
+// build inverted-index of ports over ProbeInfos
+func (pDB *ProbeDB) buildProbeIndex() {
 
-}
+	for i := range pDB.ProbeInfos {
+		probe := pDB.ProbeInfos[i]
 
-// Access probe matches via port / sslport
-func (nmapProbeDb *NmapProbeDB) Matches(port uint16) {
-
+		for _, port := range probe.Ports {
+			pDB.ProbeIdx.ByPort[port] = append(pDB.ProbeIdx.ByPort[port], &probe)
+		}
+	}
 }
 
 type ScannedPortInfo struct {
