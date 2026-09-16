@@ -113,7 +113,7 @@ func parsesMatchOptions(matchOpts string) MatchInfo {
 	return m
 }
 
-func ParseNmapProbeDb(filepath string) {
+func ParseNmapProbeDb(filepath string, pDB *ProbeDB) {
 
 	probeDB, err := os.Open(filepath)
 	if err != nil {
@@ -134,67 +134,60 @@ func ParseNmapProbeDb(filepath string) {
 		currLine := scanner.Text()
 		fields := strings.Fields(currLine)
 
-		// new probe
-		if currLine == NEXTPROBE {
+		switch {
+
+		case currLine == NEXTPROBE:
 			// If already parsing a probe, save/log the previous one here.
+			if parsingProbe {
+				pDB.ProbeInfos = append(pDB.ProbeInfos, p)
+			}
 			p = ProbeInfo{}
 			parsingProbe = true
-			continue
-		}
 
-		if !parsingProbe {
-			continue
-		}
-
-		// probe data
-		if strings.HasPrefix(currLine, "Probe") {
+		case strings.HasPrefix(currLine, "Probe "):
 			p.Transport = fields[1]
 			p.Name = fields[2]
 			p.Payload = []byte(fields[3][2 : len(fields[3])-1])
-			continue
-		}
 
-		// rarity score
-		if strings.HasPrefix(currLine, "rarity") {
+		case strings.HasPrefix(currLine, "rarity "):
 			rarity, err := strconv.Atoi(fields[1])
 			if err != nil {
 				fmt.Printf("Failed to get rarity score: %v\n", err)
 				continue
 			}
 			p.Rarity = uint16(rarity)
-			continue
-		}
 
-		// ports
-		if strings.HasPrefix(currLine, "ports") {
+		case strings.HasPrefix(currLine, "ports "):
 			ports := strings.Fields(currLine)
 			p.Ports, err = parsePorts(ports[1])
 			if err != nil {
 				fmt.Printf("Failed parsing ports: %v\n", err)
 			}
-			continue
-		}
 
-		// sslports
-		if strings.HasPrefix(currLine, "sslports") {
+		case strings.HasPrefix(currLine, "sslports "):
 			sslports := strings.Fields(currLine)
 			p.SSLPorts, err = parsePorts(sslports[1])
 			if err != nil {
 				fmt.Printf("Failed parsing SSL ports: %v\n", err)
 			}
-			continue
-		}
 
-		// match queries
-		var m MatchInfo
-		if strings.HasPrefix(currLine, "match") || strings.HasPrefix(currLine, "softmatch") {
+		case strings.HasPrefix(currLine, "totalwaitms "):
+			totalwaitms := strings.Fields(currLine)
+			totalwaitmsn, err := strconv.Atoi(totalwaitms[1])
+			if err != nil {
+				fmt.Printf("Failed parsing total wait ms: %v\n", err)
+			}
+			p.TotalWaitMS = uint16(totalwaitmsn)
 
-			fmt.Println("Match info")
+		case strings.HasPrefix(currLine, "match "),
+			strings.HasPrefix(currLine, "softmatch "):
 
-			if strings.HasPrefix(currLine, "match") {
+			var m MatchInfo
+
+			if strings.HasPrefix(currLine, "match ") {
 				m.Type = "match"
 			}
-			if strings.HasPrefix(currLine, "softmatch") {
+			if strings.HasPrefix(currLine, "softmatch ") {
 				m.Type = "softmatch"
 			}
 
@@ -221,13 +214,30 @@ func ParseNmapProbeDb(filepath string) {
 			m.CPEs = mOpts.CPEs
 
 			p.Matches = append(p.Matches, m)
+
+		default:
 			continue
 		}
+	}
 
-		// log probe
-		fmt.Println("=================| New Probe |=================")
-		fmt.Printf("Transport: %s\nProbe used: %s\nPayload: %s\nRarity: %d\n",
-			p.Transport, p.Name, string(p.Payload), p.Rarity)
+	// flush final probe
+	if parsingProbe {
+		pDB.ProbeInfos = append(pDB.ProbeInfos, p)
+	}
+
+	if scanner.Err() != nil {
+		log.Fatal(err)
+	}
+}
+
+func dumpProbe(pDB *ProbeDB) {
+
+	for _, p := range pDB.ProbeInfos {
+
+		fmt.Println("=================| Probe |=================")
+		fmt.Printf("Transport: %s\n", p.Transport)
+		fmt.Printf("Probe used: %s\n", p.Name)
+		fmt.Printf("Rarity: %d\n", p.Rarity)
 
 		fmt.Printf("Ports: ")
 		for _, port := range p.Ports {
@@ -236,15 +246,25 @@ func ParseNmapProbeDb(filepath string) {
 		fmt.Println()
 
 		fmt.Printf("SSL Ports: ")
-		for _, sslport := range p.SSLPorts {
-			fmt.Printf("%d ", sslport)
+		for _, port := range p.SSLPorts {
+			fmt.Printf("%d ", port)
 		}
 		fmt.Println()
 
+		fmt.Printf("Total wait ms: %d\n", p.TotalWaitMS)
+
 		fmt.Println("Matches")
 		for _, match := range p.Matches {
-			fmt.Printf("Type: %s\nService: %s\nPattern: %s\nProduct: %s\nVersion: %s\nInfo: %s\nOS: %s\n",
-				match.Type, match.Service, match.Pattern, match.Product, match.Version, match.Info, match.OS)
+			fmt.Printf(
+				"Type: %s\nService: %s\nPattern: %s\nProduct: %s\nVersion: %s\nInfo: %s\nOS: %s\n",
+				match.Type,
+				match.Service,
+				match.Pattern,
+				match.Product,
+				match.Version,
+				match.Info,
+				match.OS,
+			)
 
 			fmt.Printf("CPEs: ")
 			for _, cpe := range match.CPEs {
@@ -252,9 +272,5 @@ func ParseNmapProbeDb(filepath string) {
 			}
 			fmt.Println()
 		}
-	}
-
-	if scanner.Err() != nil {
-		log.Fatal(err)
 	}
 }
