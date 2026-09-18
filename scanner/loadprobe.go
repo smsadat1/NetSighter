@@ -1,9 +1,8 @@
 package scanner
 
-func LoadNmapProbeDB() {
+func loadNmapProbeDB(npDb *ProbeDB) {
 
-	var npDb ProbeDB
 	// TODO: replace with S3 download
-	ParseNmapProbeDb("../nmapserviceprobelist", &npDb)
+	ParseNmapProbeDb("../nmapserviceprobelist", npDb)
 	npDb.buildProbeIndex()
 }
