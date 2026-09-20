@@ -1,0 +1,8 @@
+##############################NEXT PROBE##############################
+Probe {transport_name} {probe_name} q |{payload_bytes}|
+rarity {rarity_score}
+ports list[{port_number}]
+sslports list[{ssl_port_number}]
+totalwaitms {duration_ms}
+
+list[match {match_name} m|{regex}| p/{product_name}/ v/{version}/ i/{match_info}/ o/{OS_info}/ cpe:/{cpe_string}/]

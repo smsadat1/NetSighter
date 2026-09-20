@@ -33,6 +33,13 @@ func (ps *PortScanner) StartPortScant(f int, l int, timeout time.Duration) {
 
 func main() {
 
+	/*
+		1. Load probeDB in memory (download nmapserviceprobelist from S3)
+		2. Wait for job (IP range)
+		3. Start scanning and probing in parallel (upto 1000 Go routines)
+		4. Send raw result to S3 and metadata to SQS as enrichment job (for CVE+CWE+CVSS worker)
+	*/
+
 	fileLimit, err := scanner.GetOpenFileLimit()
 	if err != nil {
 		fmt.Errorf("NetSighter: %v", err)
