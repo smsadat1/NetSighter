@@ -1,0 +1,267 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap');
+
+:root {
+    --green: #18c52b;
+    --green-dark: #0b6415;
+    --white: #e8e8e8;
+    --muted: #777;
+    --black: #000;
+    --border: #262626;
+}
+
+body {
+    margin: 0;
+    background: var(--black);
+    overscroll-behavior: none;
+    overflow: hidden;
+    height: 100%;
+
+    font-family: 'Archivo', sans-serif;
+}
+
+/* -------------------------
+   BRAND
+------------------------- */
+
+#info {
+    position: fixed;
+    top: 15px;
+    left: 30px;
+    z-index: 100;
+
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+
+    font-family: 'Archivo', sans-serif;
+}
+
+/* NetSighter */
+
+.title-wrapper {
+    display: flex;
+    align-items: center;
+
+    height: 50px;
+    padding: 0 18px;
+
+    background: #050505;
+    border: 1px solid #18c52b;
+    box-shadow: 5px 5px 0 #0b6415;
+
+    box-sizing: border-box;
+}
+
+.title-wrapper > a {
+    color: #18c52b;
+
+    font-family: 'Archivo', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+
+/* -------------------------
+   SEARCH
+------------------------- */
+
+#info search {
+    display: block;
+}
+
+#info search form {
+    display: flex;
+
+    width: 420px;
+    height: 50px;
+
+    background: #050505;
+    border: 1px solid #18c52b;
+    box-shadow: 5px 5px 0 #0b6415;
+
+    box-sizing: border-box;
+}
+
+#site-search {
+    flex: 1;
+    min-width: 0;
+
+    padding: 0 14px;
+
+    background: transparent;
+    border: none;
+    outline: none;
+
+    color: #e8e8e8;
+
+    font-family: 'Archivo', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+#site-search::placeholder {
+    color: #666;
+}
+
+#site-search:focus {
+    background: #080808;
+}
+
+#info search button {
+    width: 52px;
+
+    border: none;
+    border-left: 1px solid #18c52b;
+
+    background: #18c52b;
+    color: #000;
+
+    font-family: 'Archivo', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+#info search button:hover {
+    background: #e8e8e8;
+}
+
+/* -------------------------
+   REGION PANEL
+------------------------- */
+#vantage-status {
+    position: fixed;
+    top: 15px;
+    right: 30px;
+    z-index: 100;
+
+    width: 260px;
+
+    padding: 14px;
+
+    background: #050505;
+    border: 1px solid #262626;
+    box-shadow: 5px 5px 0 #111;
+
+    box-sizing: border-box;
+
+    font-family: 'Archivo', sans-serif;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-bottom: 10px;
+    margin-bottom: 5px;
+
+    border-bottom: 1px solid #262626;
+
+    color: #777;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.panel-header strong {
+    color: #18c52b;
+    font-size: 16px;
+}
+
+.region-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.region {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    align-items: center;
+    gap: 8px;
+
+    min-height: 27px;
+
+    color: #d0d0d0;
+    font-size: 9px;
+    letter-spacing: 0.8px;
+}
+
+.region-name {
+    color: #aaa;
+}
+
+.region-state {
+    color: #cacaca;
+    font-size: 8px;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.status-dot.full {
+    background: #18c52b;
+}
+
+.status-dot.half {
+    background: #d6b72c;
+}
+
+.status-dot.idle {
+    background: #666;
+}
+
+.status-dot.offline {
+    background: #d52b2b;
+}
+
+
+/* -------------------------
+   OVERLAY
+------------------------- */
+
+#overlay {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.75);
+}
+
+#overlay button {
+    padding: 14px 24px;
+
+    background: var(--green);
+    border: 2px solid var(--green);
+
+    color: #000;
+
+    font-family: 'Archivo', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
+
+    box-shadow: 5px 5px 0 #fff;
+}
+
+#overlay button:hover {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0 #fff;
+}

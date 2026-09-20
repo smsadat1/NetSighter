@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>NetSighter - Internet intelligence made easy</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<meta property="og:title" content="three.js webgpu - earth">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://threejs.org/examples/webgpu_tsl_earth.html">
+		<meta property="og:image" content="https://threejs.org/examples/screenshots/webgpu_tsl_earth.jpg">
+		<link type="text/css" rel="stylesheet" href="globe.css">
+	</head>
+	<body>
+
+		<div id="info">
+    		<div class="title-wrapper">
+    		    <a target="_blank" rel="noopener">NetSighter</a>
+    		</div>
+
+		    <search>
+		        <form action="/search-results" method="GET">
+		            <input
+		                type="search"
+		                id="site-search"
+		                name="q"
+		                placeholder="IP / HOST / DOMAIN"
+		                aria-label="Search IP, host, or domain"
+		                required
+		            >
+		            <button type="submit">→</button>
+		        </form>
+		    </search>
+		</div>
+
+		<div id="vantage-status">
+    	<div class="panel-header">
+    	    <span>VANTAGE REGIONS</span>
+    	    <strong>7/7</strong>
+    	</div>
+
+    	<div class="region-list">
+    	    <div class="region">
+    	        <span class="status-dot full"></span>
+    	        <span class="region-name">NORTH AMERICA</span>
+    	        <span class="region-state">FULL</span>
+    	    </div>
+
+        	<div class="region">
+        	    <span class="status-dot full"></span>
+        	    <span class="region-name">SOUTH AMERICA</span>
+        	    <span class="region-state">FULL</span>
+        	</div>
+
+        	<div class="region">
+        	    <span class="status-dot full"></span>
+        	    <span class="region-name">EUROPE</span>
+        	    <span class="region-state">FULL</span>
+        	</div>
+
+        	<div class="region">
+        	    <span class="status-dot half"></span>
+        	    <span class="region-name">MIDDLE EAST</span>
+        	    <span class="region-state">HALF</span>
+        	</div>
+
+        	<div class="region">
+        	    <span class="status-dot full"></span>
+        	    <span class="region-name">SOUTH ASIA</span>
+        	    <span class="region-state">FULL</span>
+        	</div>
+
+        	<div class="region">
+        	    <span class="status-dot idle"></span>
+        	    <span class="region-name">EAST ASIA</span>
+        	    <span class="region-state">IDLE</span>
+        	</div>
+
+        	<div class="region">
+        	    <span class="status-dot full"></span>
+        	    <span class="region-name">AFRICA</span>
+        	    <span class="region-state">FULL</span>
+        	</div>
+	    </div>
+	</div>
+
+
+		<script type="module" src="main.js"></script>
+	</body>
+</html>
