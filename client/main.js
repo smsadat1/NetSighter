@@ -13,3 +13,5 @@ globe.addMarker(8.6821, 50.1109, "ACTIVE");    // Frankfurt
 globe.addMarker(-78.65, 37.43, "IDLE");         // Virginia
 globe.addMarker(55.296249, 25.276987, "ACTIVE") // Dubai
 globe.addMarker(139.6917, 35.6895, "IDLE")      // Tokyo
+
+globe.flyTo(39.6917, 35.6895)

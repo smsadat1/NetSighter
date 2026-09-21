@@ -52,34 +52,25 @@ export class Globe {
         this.sphereGeometry = null;
         this.renderer = null;
         this.controls = null;
+
+        this.flyToActive = false;
+        this.flyToTargetQuaternion = new THREE.Quaternion();
+        this.flyToSpeed = 4.0;
+        this.locationMarker = null;
     }
 
     start() {
 
-        // Sun
-        const sun = new THREE.DirectionalLight('#d0dccc', 2);
-        sun.position.set(0, 0, 3);
-        this.scene.add(sun);
-
-        this.sunOrientation =
-            normalWorldGeometry.dot(normalize(sun.position)).toVar();
-
-
         // Uniforms
-        this.atmosphereDayColor = uniform(color('#105b19'));
-        this.atmosphereTwilightColor = uniform(color('#064d12'));
+        this.atmosphereDayColor = uniform(color('#10135b'));
+        this.atmosphereTwilightColor = uniform(color('#06254d'));
         this.roughnessLow = uniform(0.25);
         this.roughnessHigh = uniform(0.35);
 
 
         // Textures
         const textureLoader = new THREE.TextureLoader();
-
-        this.dayTexture = textureLoader.load('./assets/earth_day_4096.jpg');
-        this.dayTexture.colorSpace = THREE.SRGBColorSpace;
-        this.dayTexture.anisotropy = 8;
-
-        this.nightTexture = textureLoader.load('./assets/earth_night_4096.jpg');
+        this.nightTexture = textureLoader.load('./assets/earth_lights_2048.png');
         this.nightTexture.colorSpace = THREE.SRGBColorSpace;
         this.nightTexture.anisotropy = 8;
 
@@ -91,19 +82,12 @@ export class Globe {
 
         // Fresnel
         const viewDirection = positionWorld.sub(cameraPosition).normalize();
-
         this.fresnel =
             viewDirection.dot(normalWorldGeometry).abs().oneMinus().toVar();
 
-
         // Atmosphere color
         this.atmosphereColor =
-            mix(
-                this.atmosphereTwilightColor,
-                this.atmosphereDayColor,
-                this.sunOrientation.smoothstep(-0.25, 0.75)
-            );
-
+            mix(this.atmosphereTwilightColor, this.atmosphereDayColor);
 
         // Globe
         const globeMaterial = new THREE.MeshStandardNodeMaterial();
@@ -119,25 +103,10 @@ export class Globe {
             max(texture(this.bumpRoughnessCloudsTexture).g, step(0.01, cloudsStrength));
 
         globeMaterial.roughnessNode =
-            roughness.remap(
-                0,
-                1,
-                this.roughnessLow,
-                this.roughnessHigh
-            );
-
+            roughness.remap(0, 1, this.roughnessLow, this.roughnessHigh);
 
         const night = texture(this.nightTexture);
-        const dayStrength = this.sunOrientation.smoothstep(-0.25, 0.5);
-        const atmosphereDayStrength = this.sunOrientation.smoothstep(-0.5, 1);
-        const atmosphereMix = atmosphereDayStrength.mul(this.fresnel.pow(2)).clamp(0, 1);
-
-
-        let finalOutput = mix(night.rgb, output.rgb, dayStrength);
-        finalOutput = mix(finalOutput, this.atmosphereColor, atmosphereMix);
-
-        globeMaterial.outputNode = vec4(finalOutput, output.a);
-
+        globeMaterial.outputNode = vec4(night.rgb, output.a);
 
         const bumpElevation =
             max(texture(this.bumpRoughnessCloudsTexture).r, cloudsStrength.mul(0.1));
@@ -150,42 +119,13 @@ export class Globe {
 
         // Atmosphere
         const atmosphereMaterial =
-            new THREE.MeshBasicNodeMaterial({
-                side: THREE.BackSide,
-                transparent: true
-            });
+            new THREE.MeshBasicNodeMaterial({side: THREE.BackSide, transparent: true});
 
-
-        let alpha =
-            this.fresnel
-                .remap(0.73, 1, 1, 0)
-                .pow(3);
-
-
-        alpha =
-            alpha.mul(
-                this.sunOrientation.smoothstep(-0.5, 1)
-            );
-
-
-        atmosphereMaterial.outputNode =
-            vec4(
-                this.atmosphereColor,
-                alpha
-            );
-
-
-        const atmosphere =
-            new THREE.Mesh(
-                this.sphereGeometry,
-                atmosphereMaterial
-            );
-
-
+        let alpha = this.fresnel.remap(0.73, 1, 1, 0).pow(3);
+        atmosphereMaterial.outputNode =vec4(this.atmosphereColor, alpha);
+        const atmosphere =new THREE.Mesh(this.sphereGeometry, atmosphereMaterial);
         atmosphere.scale.setScalar(1.04);
-
         this.scene.add(atmosphere);
-
     }
 
 
@@ -278,8 +218,71 @@ export class Globe {
     animate() {
         this.timer.update();
         const delta = this.timer.getDelta();
-        this.globe.rotation.y += delta * 0.025;
+
+        if (this.flyToActive) {
+            const step = Math.min(delta * this.flyToSpeed, 1);
+            this.globe.quaternion.slerp(this.flyToTargetQuaternion, step);
+            if (this.globe.quaternion.angleTo(this.flyToTargetQuaternion) < 0.001) {
+                this.globe.quaternion.copy(this.flyToTargetQuaternion);
+                this.flyToActive = false;
+            }
+        } else {
+            this.globe.rotation.y += delta * 0.025;
+        }
+
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
+    }
+
+    flyTo(lon, lat) {
+
+        if (!this.globe) {
+            return;
+        }
+
+        const targetLocal = latLonToVector3(lat, lon, 1);
+        
+        /*
+         * Where is the target currently pointing in world space?
+         *
+         * targetLocal = coordinate on the Earth
+         * globe.quaternion = Earth's current orientation
+         */
+        const targetWorld =
+            targetLocal.clone().applyQuaternion(this.globe.quaternion).normalize();
+
+        /*
+         * Direction from the center of the globe toward
+         * the camera.
+         *
+         * Camera itself does NOT move.
+         */
+        const cameraDirection = this.camera.position.clone().normalize();
+    
+        // Find the shortest rotation that moves: targetWorld → cameraDirection
+        const correction =
+            new THREE.Quaternion().setFromUnitVectors(targetWorld, cameraDirection);
+
+        // Apply that correction to the globe's CURRENT orientation.
+        this.flyToTargetQuaternion = correction.multiply(this.globe.quaternion.clone());
+        this.flyToActive = true;
+
+        // create the searched-location ring.
+        if (this.locationMarker) {
+            this.globe.remove(this.locationMarker);
+        }
+
+        const geometry = new THREE.RingGeometry(0.015, 0.020, 32);
+        const material =
+            new THREE.MeshBasicMaterial({color: 0x58cef2, side: THREE.DoubleSide, transparent: true, opacity: 0.95});
+
+        this.locationMarker = new THREE.Mesh(geometry, material);
+        this.locationMarker.position.copy(latLonToVector3(lat, lon, 1.06));
+
+        // Make the ring face outward from the Earth.
+        this.locationMarker.lookAt(this.locationMarker.position.clone().multiplyScalar(2));
+
+        // rotate with Earth
+        this.globe.add(this.locationMarker);
     }
 }
