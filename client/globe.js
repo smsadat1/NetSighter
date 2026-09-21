@@ -129,28 +129,14 @@ export class Globe {
     }
 
 
-    render() {
+    render(container) {
+        this.renderer = new THREE.WebGPURenderer();
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setAnimationLoop(() => this.animate());
+        // document.body.appendChild(this.renderer.domElement);
 
-        this.renderer =
-            new THREE.WebGPURenderer();
-
-        this.renderer.setPixelRatio(
-            window.devicePixelRatio
-        );
-
-        this.renderer.setSize(
-            window.innerWidth,
-            window.innerHeight
-        );
-
-        this.renderer.setAnimationLoop(
-            () => this.animate()
-        );
-
-        document.body.appendChild(
-            this.renderer.domElement
-        );
-
+        container.appendChild(this.renderer.domElement);
     }
 
 

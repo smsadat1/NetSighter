@@ -206,12 +206,8 @@ body {
     border-radius: 50%;
 }
 
-.status-dot.full {
-    background: #18c52b;
-}
-
-.status-dot.half {
-    background: #d6b72c;
+.status-dot.busy {
+    background: #13be0a;
 }
 
 .status-dot.idle {
