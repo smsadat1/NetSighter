@@ -1,88 +1,54 @@
 from fastapi import APIRouter, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from .locations import vantage_points, vantage_locations, vantage_regions
 
 app = FastAPI()
 router = APIRouter()
-
-@router.get("/status/regions")
-def get_regional_data():
-    return {
-        "regions": [
-            {
-              "id": 1,
-              "name": "NORTH AMERICA",
-              "status": "FULL",
-              "active_azs": 3,
-              "max_azs": 3
-            },
-            {
-              "id": 2,
-              "name": "SOUTH AMERICA",
-              "status": "HALF",
-              "active_azs": 1,
-              "max_azs": 2
-            },
-            {
-              "id": 3,
-              "name": "EUROPE",
-              "status": "FULL",
-              "active_azs": 3,
-              "max_azs": 3
-            },
-            {
-              "id": 4,
-              "name": "MIDDLE EAST",
-              "status": "HALF",
-              "active_azs": 1,
-              "max_azs": 2
-            },
-            {
-              "id": 5,
-              "name": "SOUTH ASIA",
-              "status": "FULL",
-              "active_azs": 3,
-              "max_azs": 3
-            },
-            {
-              "id": 6,
-              "name": "EAST ASIA",
-              "status": "HALF",
-              "active_azs": 6,
-              "max_azs": 9,
-            },
-            {
-              "id": 7,
-              "name": "AFRICA",
-              "status": "FULL",
-              "active_azs": 9,
-              "max_azs": 9,
-            },
-        ],
-        "active_regions": 7,
-        "total_regions": 7,
-    }
-
 app.include_router(router)
 
+origins = [
+    "http://localhost:5173",    
+    "http://127.0.0.1:5173",    
+]
 
-@router.get("/status/azs")
-def get_az_data():
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,         
+    allow_credentials=True,       
+    allow_methods=["*"],            
+    allow_headers=["*"],           
+)
+
+@router.get("/status/vantages")
+def get_regional_data():
+    
+    regions = [
+       {
+           "region": region,
+           "status": status,
+       }
+       for region, status in vantage_regions.items()
+    ]
+
     return {
-        "availability_zones": [
-            {
-              "id": "ap-southeast-1a",
-              "region": "ap-southeast-1",
-              "city": "Singapore",
-              "latitude": 1.3521,
-              "longitude": 103.8198,
-              "status": "RUNNING"
-            },
-            {
-              "id": "ap-southeast-1b",
-              "region": "ap-southeast-1",
-              "city": "Singapore",
-              "latitude": 1.3521,
-              "longitude": 103.8198,
-              "status": "IDLE"
-            }
-        ]
+        "regions": regions,
+        "active": sum(status == "BUSY" for status in vantage_regions.values()),
+        "total": len(vantage_regions),
     }
+
+
+@router.get("/status/locations")
+def get_az_data():
+
+    vantages = [
+        {
+            "vantage_point": vantage_point,
+            "city": city,
+            "latitude": vantage_locations[vantage_point]["lat"],
+            "longitude": vantage_locations[vantage_point]["lon"],
+            "status": vantage_locations[vantage_point]["status"],
+        }
+        for vantage_point, city in vantage_points.items()
+    ]
+    return {"vantages": vantages}
