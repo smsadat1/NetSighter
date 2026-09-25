@@ -37,3 +37,119 @@ vantage_locations = {
     "ap-east-2": {"lat": 25.0330, "lon": 121.5654, "status": "IDLE"},
     "af-south-1": {"lat": -33.9249, "lon": 18.4241, "status": "ACTIVE"},
 }
+
+mock_data_cf = {
+    "observation_id": "obsv-123",
+    "ip": "1.1.1.1",
+    "observed_at": "2026-10-03T23:23:09Z",
+    "vantage_region": "ap-south-1",
+
+    "services": [
+        {
+            "port": 53,
+            "transport": "udp",
+            "service": "dns",
+            "product": "Cloudflare DNS",
+            "version": None,
+            "cpe": []
+        },
+        {
+            "port": 53,
+            "transport": "tcp",
+            "service": "dns",
+            "product": "Cloudflare DNS",
+            "version": None,
+            "cpe": []
+        },
+        {
+            "port": 80,
+            "transport": "tcp",
+            "service": "http",
+            "product": "Cloudflare",
+            "version": None,
+            "cpe": []
+        },
+        {
+            "port": 443,
+            "transport": "tcp",
+            "service": "https",
+            "product": "Cloudflare",
+            "version": None,
+            "cpe": []
+        }
+    ],
+
+    "domain": {
+        "names": [
+            "cloudflare.com",
+            "one.one.one.one"
+        ],
+
+        "rdap": {
+            "handle": "NET-1-0-0-0-1",
+            "name": "Cloudflare, Inc.",
+            "country": "US",
+            "status": [
+                "active"
+            ]
+        },
+
+        "whois": {
+            "registrar": "Cloudflare, Inc.",
+            "organization": "Cloudflare, Inc.",
+            "country": "US"
+        },
+
+        "dns": {
+            "ptr": [
+                "one.one.one.one"
+            ],
+            "a": [
+                "1.1.1.1"
+            ],
+            "aaaa": [
+                "2606:4700:4700::1111"
+            ]
+        }
+    },
+
+    "vulnerabilities": [
+        {
+            "cve": "CVE-MOCK-0001",
+            "cwe": ["CWE-200"],
+            "cvss": 4.3,
+            "cpe": "cpe:2.3:a:example:dns-service:1.0:*:*:*:*:*:*:*",
+            "status": "test-fixture"
+        },
+        {
+            "cve": "CVE-MOCK-0002",
+            "cwe": ["CWE-16"],
+            "cvss": 6.5,
+            "cpe": "cpe:2.3:a:example:http-service:2.0:*:*:*:*:*:*:*",
+            "status": "test-fixture"
+        }
+    ],
+
+    "analysis": """
+    ## Observation Summary
+
+    1.1.1.1 appears to be an externally accessible Cloudflare-operated
+    DNS resolver endpoint.
+
+    DNS service is exposed over both UDP and TCP on port 53. HTTP and
+    HTTPS services are also reachable and appear to be associated with
+    Cloudflare infrastructure.
+
+    No confirmed vulnerabilities were identified from the available
+    service fingerprints.
+
+    The observed hostname information is consistent with Cloudflare's
+    public DNS infrastructure.
+    """,
+
+    "artifacts": {
+        "vulnerability_db": "nvd-v44",
+        "llm_model": "qwen3:4b",
+        "llm_prompt_version": "v3"
+    }
+}
