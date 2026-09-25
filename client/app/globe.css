@@ -261,3 +261,98 @@ body {
     transform: translate(3px, 3px);
     box-shadow: 2px 2px 0 #fff;
 }
+
+
+#observation-panel {
+    display: flex;
+    flex-direction: column;
+
+    position: fixed;
+    left: 30px;
+    bottom: 25px;
+    z-index: 100;
+
+    width: 520px;
+    height: 280px;
+
+    padding: 8px;
+
+    background: #050505;
+    border: 1px solid #262626;
+    box-shadow: 5px 5px 0 #111;
+
+    box-sizing: border-box;
+
+    font-family: 'monospace', sans-serif;
+    color: #d0d0d0;
+}
+
+#observation-panel .panel-content {
+    height: calc(100% - 45px);
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+
+    margin-top: 8px;
+
+    overflow-y: auto;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+#observation-panel .panel-content p {
+    margin: 6px 0;
+}
+
+#observation-panel .panel-content h2,
+#observation-panel .panel-content h3 {
+    margin: 8px 0 5px;
+}
+
+#observation-panel .panel-content ul {
+    margin: 6px 0;
+    padding-left: 16px;
+}
+
+.cursor {
+    color: #18c52b;
+    animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.panel-actions {
+    display: flex;
+    gap: 6px;
+
+    margin-top: 14px;
+    padding-top: 10px;
+
+    border-top: 1px solid #262626;
+}
+
+.panel-actions button {
+    padding: 6px 8px;
+
+    background: #050505;
+    border: 1px solid #262626;
+
+    color: #d3feaf;
+
+    font-family: 'Archivo', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+
+    cursor: pointer;
+}
+
+.panel-actions button:hover {
+    border-color: #18c52b;
+    color: #18c52b;
+}

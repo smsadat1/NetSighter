@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Globe } from "./globe.js";
+import Search  from "./search.jsx"
+import Panel from "./panel.jsx";
 
 export default function App() {
     const containerRef = useRef(null);
@@ -8,6 +10,9 @@ export default function App() {
     const [regions, setRegions] = useState([]);
     const [active, setActive] = useState(0);
     const [total, setTotal] = useState(0);
+    const [observation, setObservation] = useState(null);
+    const [panelText, setPanelText] = useState("");
+    const [typing, setTyping] = useState(false);
 
     useEffect(() => {
         const globe = new Globe();
@@ -51,9 +56,48 @@ export default function App() {
             setTotal(regionsData.total);
             setVantages(vantagesData.vantages ?? vantagesData);
         }
-
         loadData();
     }, []);
+
+
+    async function handleSearch(event) {
+        
+        event.preventDefault();
+
+        const ip = event.target.q.value;
+        const response = await fetch(
+            `http://localhost:8000/search/${ip}`, {method: "POST"}
+        );
+        const data = await response.json();
+        
+        if (!data.found) {
+            setObservation({found: false, ip: ip, message: data.message});
+            return;
+        }
+        
+        globeRef.current.addMarker(data.longitude, data.latitude, "ACTIVE");
+        globeRef.current.flyTo(data.longitude, data.latitude);
+        
+        const summaryResponse = await fetch(
+            `http://localhost:8000/observation/${ip}/summary`
+        );
+        const summary = await summaryResponse.json();
+        
+        setObservation({
+            found: true, ip: ip, summary: summary.summary
+        });
+
+        setPanelText("");
+        setTyping(true);
+
+        for (let i = 0; i < summary.summary.length; i += 5) {
+            await new Promise(resolve => setTimeout(resolve, 15));
+            setPanelText(summary.summary.slice(0, i + 5));
+        }
+
+        setPanelText(summary.summary);
+        setTyping(false);
+    }
 
     console.log("REGIONS:", regions);
     return (
@@ -67,20 +111,7 @@ export default function App() {
                 <div className="title-wrapper">
                     <a>NetSighter</a>
                 </div>
-                
-                <search>
-                    <form action="/search-results" method="GET">
-                        <input
-                            type="search"
-                            id="site-search"
-                            name="q"
-                            placeholder="IP / HOST / DOMAIN"
-                            aria-label="Search IP, host, or domain"
-                            required
-                        />
-                        <button type="submit">→</button>
-                    </form>
-                </search>
+                <Search handleSearch={handleSearch} />     
             </div>
 
             <div id="vantage-status">
@@ -99,6 +130,8 @@ export default function App() {
                     ))}
                 </div>
             </div>
+
+            <Panel observation={observation} text={panelText} typing={typing}/>           
         </>
     );
 }

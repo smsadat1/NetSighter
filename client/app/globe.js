@@ -70,7 +70,7 @@ export class Globe {
 
         // Textures
         const textureLoader = new THREE.TextureLoader();
-        this.nightTexture = textureLoader.load('./assets/earth_lights_2048.png');
+        this.nightTexture = textureLoader.load('../assets/earth_lights_2048.png');
         this.nightTexture.colorSpace = THREE.SRGBColorSpace;
         this.nightTexture.anisotropy = 8;
 
