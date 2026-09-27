@@ -1,5 +1,8 @@
 # NetSighter
+
+![Demo](./client/assets/netsighterdemo.gif)
 **Distributed network observation & historical service intelligence.**
+
 
 ## Architecture
 ```
