@@ -1,10 +1,21 @@
 import ReactMarkdown from "react-markdown";
 
-export default function Panel({ observation, text, typing }) {
-    
+export default function Panel({ observation, text, typing, showDetails }) {
     
     if (!observation) {
         return null;
+    }
+
+    function downloadJSON() {
+        const blob = new Blob([JSON.stringify(observation, null, 4)], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = `${observation.ip}.json`;
+        link.click();
+
+        URL.revokeObjectURL(url);
     }
 
     return (
@@ -25,8 +36,8 @@ export default function Panel({ observation, text, typing }) {
                 </div>       
             )}
             <div className="panel-actions">
-                <button type="button">SHOW DETAILS</button>
-                <button type="button">DOWNLOAD RAW</button>
+                <button type="button" onClick={() =>  { console.log("DETAIL IP:", observation.ip); showDetails(observation.ip); }}> SHOW DETAILS </button>
+                <button type="button" onClick={downloadJSON}> DOWNLOAD JSON </button>
                 <span className="panel-meta">{observation.observation_id}</span>
             </div>
         </div>

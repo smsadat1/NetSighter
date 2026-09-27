@@ -57,6 +57,10 @@ export class Globe {
         this.flyToTargetQuaternion = new THREE.Quaternion();
         this.flyToSpeed = 4.0;
         this.locationMarker = null;
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        this.hoveredMarker = null;
+        this.tooltip = null;
     }
 
     start() {
@@ -137,6 +141,10 @@ export class Globe {
         // document.body.appendChild(this.renderer.domElement);
 
         container.appendChild(this.renderer.domElement);
+        this.tooltip = document.createElement("div");
+        this.tooltip.id = "location-tooltip";
+        this.tooltip.style.display = "none";
+        document.body.appendChild(this.tooltip);
     }
 
 
@@ -150,8 +158,54 @@ export class Globe {
 
     addEvent() {
         window.addEventListener('resize', () => this.onWindowResize());
+        this.renderer.domElement.addEventListener('mousemove', (event) => this.onMouseMove(event));
     }
 
+    onMouseMove(event) {
+        const rect = this.renderer.domElement.getBoundingClientRect();
+
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+
+        const markers = this.globe.children.filter(child => child.userData.region || child.userData.ip);
+        const intersections = this.raycaster.intersectObjects(markers, true);
+
+        if (!intersections.length) {
+            this.hoveredMarker = null;
+            this.tooltip.style.display = "none";
+            return;
+        }
+
+        let marker = intersections[0].object;
+
+        while (marker.parent && !marker.userData.region && !marker.userData.ip) {
+            marker = marker.parent;
+        }
+
+        this.hoveredMarker = marker;
+
+        if (marker.userData.region) {
+        this.tooltip.innerHTML = `
+            REGION <strong>${marker.userData.region}</strong><br>
+            CITY <strong>${marker.userData.city}</strong><br>
+            STATUS <strong>${marker.userData.status}</strong>
+        `;
+        } else if (marker.userData.ip) {
+            this.tooltip.innerHTML = `
+                IP <strong>${marker.userData.ip}</strong><br>
+                STATUS <strong>${marker.userData.status}</strong><br>
+                LAT <strong>${marker.userData.lat}</strong><br>
+                LON <strong>${marker.userData.lon}</strong>
+            `;
+        } else {
+            return;
+        }
+
+        this.tooltip.style.display = "block";
+        this.tooltip.style.left = `${event.clientX + 12}px`;
+        this.tooltip.style.top = `${event.clientY + 12}px`;
+    }
 
     onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -160,7 +214,7 @@ export class Globe {
     }
 
 
-    addMarker(lon, lat, status) {
+    addMarker(lon, lat, status, region, city) {
 
         let markerColor;
 
@@ -179,6 +233,10 @@ export class Globe {
         }
 
 		const group = new THREE.Group();
+
+        // Info for tooltip
+        group.userData = {region: region, city: city, status: status};
+        group.userData.isLocationMarker = true;
 
 		// Core
 		const coreGeometry = new THREE.SphereGeometry(0.009, 16, 16);
@@ -220,7 +278,7 @@ export class Globe {
         this.renderer.render(this.scene, this.camera);
     }
 
-    flyTo(lon, lat) {
+    flyTo(lon, lat, ip) {
 
         if (!this.globe) {
             return;
@@ -229,8 +287,6 @@ export class Globe {
         const targetLocal = latLonToVector3(lat, lon, 1);
         
         /*
-         * Where is the target currently pointing in world space?
-         *
          * targetLocal = coordinate on the Earth
          * globe.quaternion = Earth's current orientation
          */
@@ -238,9 +294,7 @@ export class Globe {
             targetLocal.clone().applyQuaternion(this.globe.quaternion).normalize();
 
         /*
-         * Direction from the center of the globe toward
-         * the camera.
-         *
+         * Direction from the center of the globe toward the camera.
          * Camera itself does NOT move.
          */
         const cameraDirection = this.camera.position.clone().normalize();
@@ -253,7 +307,7 @@ export class Globe {
         this.flyToTargetQuaternion = correction.multiply(this.globe.quaternion.clone());
         this.flyToActive = true;
 
-        // create the searched-location ring.
+        // remove old remaining marker (if any)
         if (this.locationMarker) {
             this.globe.remove(this.locationMarker);
         }
@@ -263,7 +317,9 @@ export class Globe {
             new THREE.MeshBasicMaterial({color: 0x58cef2, side: THREE.DoubleSide, transparent: true, opacity: 0.95});
 
         this.locationMarker = new THREE.Mesh(geometry, material);
+        this.locationMarker.userData = {ip: ip, status: "OBSERVED", lat: lat, lon: lon};
         this.locationMarker.position.copy(latLonToVector3(lat, lon, 1.06));
+        this.locationMarker.userData.isLocationMarker = true;
 
         // Make the ring face outward from the Earth.
         this.locationMarker.lookAt(this.locationMarker.position.clone().multiplyScalar(2));

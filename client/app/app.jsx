@@ -37,7 +37,9 @@ export default function App() {
         }
 
         for (const vantage of vantages) {
-            globe.addMarker(vantage.longitude, vantage.latitude, vantage.status);
+            globe.addMarker(
+                vantage.longitude, vantage.latitude, vantage.status, vantage.vantage_point, vantage.city
+            );
         }
     }, [vantages]);
 
@@ -59,11 +61,9 @@ export default function App() {
         loadData();
     }, []);
 
-
     async function handleSearch(event) {
         
         event.preventDefault();
-
         const ip = event.target.q.value;
         const response = await fetch(
             `http://localhost:8000/search/${ip}`, {method: "POST"}
@@ -76,7 +76,7 @@ export default function App() {
         }
         
         globeRef.current.addMarker(data.longitude, data.latitude, "ACTIVE");
-        globeRef.current.flyTo(data.longitude, data.latitude);
+        globeRef.current.flyTo(data.longitude, data.latitude, ip);
         
         const summaryResponse = await fetch(
             `http://localhost:8000/observation/${ip}/summary`
@@ -97,6 +97,10 @@ export default function App() {
 
         setPanelText(summary.summary);
         setTyping(false);
+    }
+
+    function showDetails(ip) {
+        window.location.href = `/details.html?ip=${encodeURIComponent(ip)}`;
     }
 
     console.log("REGIONS:", regions);
@@ -131,7 +135,7 @@ export default function App() {
                 </div>
             </div>
 
-            <Panel observation={observation} text={panelText} typing={typing}/>           
+            <Panel observation={observation} text={panelText} typing={typing} showDetails={showDetails}/>           
         </>
     );
 }
