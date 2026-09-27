@@ -1,0 +1,29 @@
+/* main.css */
+
+@import "./details.css";
+@import "./globe.css";
+@import "./home.css";
+@import "./panels.css";
+@import "./search.css";
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap');
+
+:root {
+    --green: #18c52b;
+    --green-dark: #0b6415;
+    --white: #e8e8e8;
+    --muted: #777;
+    --black: #000;
+    --border: #262626;
+}
+
+body {
+    margin: 0;
+    background: var(--black);
+    overscroll-behavior: none;
+    overflow: hidden;
+    height: 100%;
+
+    font-family: 'Archivo', sans-serif;
+}
+

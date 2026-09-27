@@ -1,0 +1,219 @@
+/* -------------------------
+   SECTIONS
+------------------------- */
+
+.details-section {
+    max-width: 1000px;
+
+    margin-bottom: 14px;
+
+    background: #050505;
+    border: 1px solid #262626;
+    box-shadow: 5px 5px 0 #111;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 12px 14px;
+
+    border-bottom: 1px solid #262626;
+
+    color: #c6c6c6;
+
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.section-header strong {
+    color: #18c52b;
+    font-size: 12px;
+}
+
+/* -------------------------
+   SERVICES
+------------------------- */
+
+.service {
+    display: grid;
+    grid-template-columns: 110px 1fr 100px;
+    align-items: center;
+
+    min-height: 55px;
+
+    padding: 0 14px;
+
+    border-bottom: 1px solid #181818;
+}
+
+.service:last-child {
+    border-bottom: none;
+}
+
+.service-port {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.service-port strong {
+    color: #e8e8e8;
+    font-size: 13px;
+}
+
+.service-port span {
+    color: #c6c6c6;
+    font-size: 8px;
+    font-weight: 600;
+}
+
+.service-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.service-info strong {
+    color: #18c52b;
+
+    font-size: 9px;
+    letter-spacing: 1px;
+}
+
+.service-info span {
+    color: #aaa;
+    font-size: 10px;
+}
+
+.service-version {
+    color: #666;
+    font-size: 9px;
+    text-align: right;
+}
+
+
+/* -------------------------
+   ANALYSIS
+------------------------- */
+
+.analysis {
+    padding: 18px;
+
+    color: #e3e3e3;
+
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.analysis h2 {
+    margin-top: 0;
+
+    color: #e8e8e8;
+
+    font-size: 15px;
+}
+
+.analysis p {
+    margin: 10px 0;
+}
+
+.analysis strong {
+    color: #e8e8e8;
+}
+
+
+/* -------------------------
+   ARTIFACTS
+------------------------- */
+
+.artifact-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.artifact {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    padding: 14px;
+
+    border-right: 1px solid #181818;
+}
+
+.artifact:last-child {
+    border-right: none;
+}
+
+.artifact span {
+    color: #666;
+
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+}
+
+.artifact strong {
+    color: #aaa;
+    font-size: 10px;
+}
+
+
+/* -------------------------
+   ACTIONS
+------------------------- */
+
+.details-actions {
+    display: flex;
+    gap: 6px;
+
+    max-width: 1000px;
+
+    margin-top: 18px;
+}
+
+.details-actions button {
+    padding: 7px 9px;
+
+    background: #050505;
+    border: 1px solid #262626;
+    border-color: #18c52b;
+    color: #18c52b;
+
+    font-family: 'Archivo', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+
+    cursor: pointer;
+}
+
+.details-actions button:hover {
+    border-color: #18c52b;
+    color: #250808;
+    background-color: #13be0a;
+}
+
+
+/* -------------------------
+   LOADING
+------------------------- */
+
+#details-loading {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #000;
+    color: #18c52b;
+
+    font-family: 'Archivo', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}

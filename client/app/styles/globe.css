@@ -1,0 +1,19 @@
+#location-tooltip {
+    position: fixed;
+    z-index: 1000;
+    padding: 10px 12px;
+    background: #050505;
+    border: 1px solid #262626;
+    box-shadow: 4px 4px 0 #111;
+    color: #e8e8e8;
+    font-family: 'Archivo', sans-serif;
+    font-size: 10px;
+    line-height: 1.7;
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+#location-tooltip strong {
+    color: #18c52b;
+    margin-left: 8px;
+}

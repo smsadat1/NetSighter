@@ -1,0 +1,142 @@
+/* -------------------------
+   BRAND
+------------------------- */
+
+#info {
+    position: fixed;
+    top: 15px;
+    left: 30px;
+    z-index: 100;
+
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+
+    font-family: 'Archivo', sans-serif;
+}
+
+/* NetSighter */
+
+.title-wrapper {
+    display: flex;
+    align-items: center;
+
+    height: 50px;
+    padding: 0 18px;
+
+    background: #050505;
+    border: 1px solid #18c52b;
+    box-shadow: 5px 5px 0 #0b6415;
+
+    box-sizing: border-box;
+}
+
+.title-wrapper > a {
+    color: #18c52b;
+
+    font-family: 'Archivo', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+
+/* -------------------------
+   OVERLAY
+------------------------- */
+
+#overlay {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.75);
+}
+
+#overlay button {
+    padding: 14px 24px;
+
+    background: var(--green);
+    border: 2px solid var(--green);
+
+    color: #000;
+
+    font-family: 'Archivo', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
+
+    box-shadow: 5px 5px 0 #fff;
+}
+
+#overlay button:hover {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0 #fff;
+}
+
+
+
+
+/* -------------------------
+   HEADER
+------------------------- */
+
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    max-width: 1000px;
+
+    padding: 18px;
+    margin-bottom: 14px;
+
+    background: #050505;
+    border: 1px solid #262626;
+    box-shadow: 5px 5px 0 #111;
+
+    box-sizing: border-box;
+}
+
+.details-label {
+    color: #c6c6c6;
+
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.details-header h1 {
+    margin: 5px 0 0;
+
+    color: #18c52b;
+
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.details-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+
+    color: #c6c6c6;
+
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+
