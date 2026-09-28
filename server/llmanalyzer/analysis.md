@@ -1,0 +1,2 @@
+# Observation Summary
+The scanner observed DNS services (ports 53/UDP and 53/TCP) identified as "Quad9 DNS" with null versions. Enrichment associated both with CPE for BIND 9.18.28, though this is not independently verified. Additionally, the scanner reported an HTTPS service (port 443) with product "Quad9" and null version, and enrichment indicated Nginx 1.24.0. The HTTPS product name "Quad9" conflicts with the Nginx CPE, and all versions remain unconfirmed per scanner observation. No vulnerabilities or software versions were inferred beyond the reported data.

@@ -1,0 +1,38 @@
+{
+    "observation_id": "obsv-789",
+    "ip": "9.9.9.9",
+    "observed_at": "2026-10-03T23:38:17Z",
+    "vantage_region": "eu-central-1",
+    "services": [
+        {
+            "port": 53,
+            "transport": "udp",
+            "service": "dns",
+            "product": "Quad9 DNS",
+            "version": null,
+            "cpe": [
+                "cpe:2.3:a:isc:bind:9.18.28:*:*:*:*:*:*:*"
+            ]
+        },
+        {
+            "port": 53,
+            "transport": "tcp",
+            "service": "dns",
+            "product": "Quad9 DNS",
+            "version": null,
+            "cpe": [
+                "cpe:2.3:a:isc:bind:9.18.28:*:*:*:*:*:*:*"
+            ]
+        },
+        {
+            "port": 443,
+            "transport": "tcp",
+            "service": "https",
+            "product": "Quad9",
+            "version": null,
+            "cpe": [
+                "cpe:2.3:a:nginx:nginx:1.24.0:*:*:*:*:*:*:*"
+            ]
+        }
+    ]
+}
