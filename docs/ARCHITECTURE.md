@@ -79,115 +79,34 @@
 ```
 
 
-## Rules
-
-* **One ASG per active AWS region.**
-* Each ASG maintains:
-
-  * **Minimum:** number of AZs in that region
-  * **Maximum:** `3 ×` number of AZs
-* When a primary ASG becomes unavailable, the scheduler launches a **new ASG at the configured fallback region** and assigns it the affected IP range.
-* The old ASG remains **invalidated for the remainder of the current Sunrise Cycle**, even if it later recovers.
-* At the beginning of a new Sunrise Cycle, infrastructure returns to the **default primary-region configuration**.
-* Leases are **duration-based**, e.g. `lease_duration: 1h`, rather than timestamp-based.
-* The scanner uses the duration as its execution deadline, but **the scheduler is authoritative over lease validity**.
-* An expired lease is expired regardless of what the scanner's local clock says.
-* Every lease should carry a **unique lease ID/fencing token** so an invalidated scanner cannot continue publishing work after reassignment.
-
-| Vantage region | Primary region | Fallback region  | Capacity |
-| -------------- | -------------- | ---------------- | -------- |
-| North America  | `us-east-1`    | `us-west-1`      |     6–18 |
-| South America  | `sa-east-1`    | `sa-east-1`      |      3–9 |
-| Europe         | `eu-central-1` | `eu-south-2`     |      3–9 |
-| Middle East    | `me-south-1`   | `me-central-1`   |      3–9 |
-| South Asia     | `ap-south-1`   | `ap-southeast-1` |      3–9 |
-| East Asia      | `ap-east-1`    | `ap-east-2`      |      3–9 |
-| Africa         | `af-south-1`   | `af-south-1`     |      3–9 |
-
-**Failover logic**
-
-```text
-Primary ASG fails
-       │
-       ▼
-Can fallback target be provisioned?
-       │
-   ┌───┴────┐
-   YES      NO
-    │        │
-    ▼        ▼
-Launch      Vantage
-new ASG     unavailable
-    │
-    ▼
-Assign entire affected range
-    │
-    ▼
-Invalidate old ASG
-until cycle boundary
-```
-
-**Sunrise Cycle boundary**
-
-```text
-CURRENT CYCLE
-    │
-    ├── primary
-    ├── fallback
-    └── invalidated old ASGs
-             │
-             ▼
-       cycle completes
-             │
-             ▼
-      RESET TO DEFAULT
-             │
-             ▼
-       NEW SUNRISE CYCLE
-```
-
-
 ```text
 S3 = source of truth
 SQS = "something is ready"
 ```
 
-### SQS event lifecycle
+### SQS & S3 event lifecycle 
 
 ```text
-          ┌─────────┐
-          │ Scanner │
-          └────┬────┘
-               │ event: observation.ready
-               | adds:  s3://{observation_id}/response.bin, s3://{observation_id}/scandata.json
-               ▼
-    ┌────────────────────┐
-    │ Domain Enrichment  │
-    │ RDAP / WHOIS / DNS │
-    └──────────┬─────────┘
-               │ event: domain.ready
-               | adds:  s3://{observation_id}/domaindata.json
-               ▼
-   ┌──────────────────────┐
-   │ Vulnerability        │
-   │ Enrichment           │
-   │ CPE → CVE/CWE/CVSS   │
-   └──────────┬───────────┘
-              │ event: vulnerabilities.ready
-              | adds: s3://{observation_id}/vulnerabilities.json
-              ▼
-   ┌────────────────────┐
-   │ LLM Enrichment     │
-   │ Qwen3-4B / Ollama  │
-   └──────────┬─────────┘
-              │ event: analysis.ready
-              | adds: s3://{observation_id}/summaries.md
-              ▼
-         ┌──────────┐
-         │ Indexer  │
-         └────┬─────┘
-              ▼
-          OpenSearch
+           ┌─────────┐
+           │ Scanner │
+           └────┬────┘
+                │ event: observation.ready
+                | data: scandata (json)
+                | (puts:  s3://{observation_id}/response.bin, s3://{observation_id}/scandata.json)
+                ▼
+     ┌────────────────────┐
+     │ LLM Enrichment     │
+     │ Qwen3-4B / Ollama  │
+     └──────────┬─────────┘
+                │ event: analysis.ready
+                | data: analysis (md)
+                | (puts: s3://{observation_id}/summaries.md)
+                ▼
+           ┌──────────┐
+           │ Indexer  │
+           └────┬─────┘
+                ▼
+            OpenSearch
 ```
 
 ---
@@ -278,3 +197,5 @@ analysis.ready
    ↓
 Indexer
 ```
+
+
