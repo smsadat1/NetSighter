@@ -4,6 +4,7 @@
 
 import os
 import boto3
+import logging
 import ollama
 from dotenv import load_dotenv
 
@@ -15,6 +16,13 @@ AWS_REGION = os.getenv("AWS_REGION")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
 S3_DEV_ENDPOINT_URL = os.getenv("S3_DEV_ENDPOINT_URL")
 SQS_DEV_QUEUE_URL = os.getenv("SQS_DEV_QUEUE_URL")
+
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
 
 
 def call_LLM(content: str):
@@ -50,32 +58,20 @@ def call_LLM(content: str):
         ]
     )
 
-    return response['message']['content']
+    return response['message']['content']    
 
 
 if __name__ == "__main__":
 
-    sqs = boto3.client('sqs', region_name=AWS_REGION)
-    response = sqs.receive_message(
-        QueueUrl=SQS_DEV_QUEUE_URL,
-        AttributeNames=['All'],
-        MessageAttributeNames=['All'],
-        MaxNumberOfMessages=10,  # max allowable messages to retrieve at once
-        WaitTimeSeconds=20       # enable long polling
+    logging.log(level=logging.INFO, msg="Initiailizing LLM analyzer...")
+
+    sqs = boto3.client(
+        "sqs",
+        endpoint_url="http://localhost:4566",
+        region_name=AWS_REGION,
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
-
-    messages = response.get('Messages', [])
-
-    # if not messages:
-    #     print("Waiting for jobs...")
-    # else:
-    #     for message in messages:
-    #         print(f"Processing message ID: {message['MessageId']}")
-    #         print(f"Body content: {message['Body']}")
-            
-    #         # Keep track of the receipt handle to delete the message later
-    #         receipt_handle = message['ReceiptHandle']
-
     s3 = boto3.client(
         "s3",
         endpoint_url=S3_DEV_ENDPOINT_URL,
@@ -84,15 +80,36 @@ if __name__ == "__main__":
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
 
-    with open("mock.json", "r") as f:
-        json_data = f.read()
+    while True:
+        logging.log(level=logging.INFO, msg="Polling SQS...")
 
-    analysis = call_LLM(content=json_data)
-    s3.put_object(
-        Bucket=S3_BUCKET_NAME,
-        Key="obsv/obsv-123/analysis.md",
-        Body=analysis,
-        ContentType="text/markdown",
-    )
-    
-    print("Done")
+        response = sqs.receive_message(
+            QueueUrl=SQS_DEV_QUEUE_URL,
+            AttributeNames=['All'],
+            MessageAttributeNames=['All'],
+            MaxNumberOfMessages=10,  # max allowable messages to retrieve at once
+            WaitTimeSeconds=20       # enable long polling
+        )
+        
+        messages = response.get('Messages', [])
+
+        if not messages:
+            logging.log(level=logging.INFO, msg="Waiting for jobs...")
+        else:
+            for message in messages:
+                logging.info(msg=f"Processing message ID: {message['MessageId']}")
+                logging.info(msg=f"Body content: {message['Body']}")
+
+                if(message["event"] == "observation.ready"):
+                    logging.info(f"Observation ID: {message["observation_id"]} is ready")
+                    logging.info("Processing for LLM analysis...")
+                    analysis = call_LLM(content=message["data"])
+                    s3.put_object(
+                        Bucket=S3_BUCKET_NAME,
+                        Key="obsv/obsv-123/analysis.md",
+                        Body=analysis,
+                        ContentType="text/markdown",
+                    )
+                else:
+                    logging.info(f"Observation ID: {message["observation_id"]} is not ready")
+                    continue
